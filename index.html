@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b0f1a">
+<title>Factory Commander v0.1 — Day One: HVAC Company</title>
+<style>
+:root{--bg:#0b0f1a;--panel:#141a2b;--line:#263049;--blue:#3b9cff;--red:#ff4d5e;--purple:#a66bff;--gold:#ffc542;--txt:#e8ecf5;--dim:#8a94ad}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.35 system-ui,Roboto,Arial,sans-serif}
+button{font:inherit;color:inherit;border:0;border-radius:12px;min-height:52px;padding:10px 14px;background:var(--line);cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.4}
+.wrap{max-width:560px;margin:0 auto;padding:10px}
+.screen{display:none}.screen.on{display:block}
+h1{font-size:24px;margin:8px 0}h2{font-size:19px;margin:6px 0}
+.big{width:100%;font-size:19px;font-weight:700;margin:6px 0}
+.blue{background:var(--blue);color:#001}.gold{background:var(--gold);color:#210}.purple{background:var(--purple);color:#100}.red{background:var(--red);color:#100}
+.meters{position:sticky;top:0;z-index:5;background:var(--bg);display:grid;grid-template-columns:1fr 1fr 1fr 64px;gap:6px;padding:6px 0}
+.m{background:var(--panel);border-radius:10px;padding:6px;text-align:center;border-bottom:3px solid}
+.m b{display:block;font-size:18px}.m small{color:var(--dim);font-size:11px}
+.mr{border-color:var(--gold)}.mp{border-color:var(--blue)}.mc{border-color:var(--purple)}
+.timer{background:var(--panel);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.inbox{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;min-height:92px}
+.card{flex:0 0 132px;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:8px;font-size:14px;text-align:left;min-height:84px}
+.card.em{border-color:var(--red)}.card.sel{outline:3px solid var(--purple)}
+.card .w{height:5px;background:var(--line);border-radius:3px;margin-top:6px;overflow:hidden}.card .w i{display:block;height:100%;background:var(--red)}
+.steps{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:6px 0}
+.steps span{font-size:10px;text-align:center;padding:5px 0;border-radius:6px;background:var(--panel);color:var(--dim)}
+.steps span.done{background:#1b3a63;color:#cfe6ff}.steps span.now{background:var(--purple);color:#100;font-weight:700}
+.panel{background:var(--panel);border-radius:14px;padding:12px;margin:8px 0;border:1px solid var(--line)}
+.dz{border-color:var(--purple)}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0}.row label{width:70px}.row output{width:28px;text-align:right;font-weight:700}
+input[type=range]{flex:1;height:36px;accent-color:var(--purple)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.good{color:#7fc4ff}.bad{color:var(--red)}.money{color:var(--gold)}
+.dim{color:var(--dim);font-size:14px}
+.log{font-size:13px;color:var(--dim);max-height:90px;overflow:auto}
+.up{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0}
+.up button{min-width:110px}
+.grade{font-size:72px;font-weight:800;color:var(--gold);text-align:center}
+ol li{margin:6px 0}
+</style></head><body><div class="wrap">
+
+<section id="sTitle" class="screen on">
+<h1>🏭 Factory Commander <span class="dim">v0.1</span></h1>
+<h2 style="color:var(--gold)">Day One: HVAC Company</h2>
+<p>You don't manage people. You manage <b style="color:var(--purple)">signals</b>. Capture them, score them, route them to the right Rig, and grow the company.</p>
+<button class="big blue" onclick="start(600)">▶ Full Day (10 min)</button>
+<button class="big purple" onclick="start(180)">⚡ Quick 3-min</button>
+<button class="big" onclick="show('sHow')">❓ How to Play</button>
+</section>
+
+<section id="sHow" class="screen">
+<h1>How to Play</h1>
+<ol>
+<li><b>Capture</b> — signals land in your inbox. Tap one. Red border = emergency.</li>
+<li><b>Score</b> — set Urgency, Value, Risk. Close to the real values = bonus.</li>
+<li><b>Route</b> — send it to the right Rig: Sales, Service, Marketing, Review, Automation.</li>
+<li><b>Build</b> — the Rig creates a response.</li>
+<li><b>Deploy</b> — send it into the world. Service jobs use Capacity for a while.</li>
+<li><b>Measure</b> — see the money, reputation and capacity result.</li>
+<li><b>Feedback</b> — learn why it worked or failed.</li>
+<li><b>Improve</b> — spend revenue on upgrades (🛠 button anytime).</li>
+</ol>
+<p class="dim">Waiting signals decay and cost Reputation. Reputation 0 = company fails. Balance Revenue, Reputation and Capacity.</p>
+<button class="big blue" onclick="show('sTitle')">Got it</button>
+</section>
+
+<section id="sGame" class="screen">
+<div class="meters">
+<div class="m mr"><small>REVENUE</small><b id="mRev" class="money">$10,000</b></div>
+<div class="m mp"><small>REPUTATION</small><b id="mRep">50</b></div>
+<div class="m mc"><small>CAPACITY</small><b id="mCap">5/5</b></div>
+<div class="timer" id="mTime">10:00</div>
+</div>
+<div class="dim">📥 Inbox (step 1 · Capture) — tap a signal</div>
+<div class="inbox" id="inbox"></div>
+<div class="steps" id="steps"></div>
+<div id="work" class="panel"></div>
+<div class="grid2"><button onclick="openShop()" class="gold">🛠 Improve</button><button onclick="endGame()">🏁 End Day</button></div>
+<div class="panel log" id="log"></div>
+</section>
+
+<section id="sShop" class="screen">
+<h1>🛠 Improve (step 8)</h1>
+<p>Cash: <b class="money" id="shopCash"></b></p>
+<div id="shopList"></div>
+<button class="big blue" onclick="show('sGame')">◀ Back to the floor</button>
+</section>
+
+<section id="sEnd" class="screen">
+<h1>📋 End of Day Scorecard</h1>
+<div class="grade" id="eGrade">A</div>
+<div class="panel" id="eStats"></div>
+<div class="panel dz"><b>Lesson:</b> <span id="eLesson"></span></div>
+<button class="big blue" onclick="show('sTitle')">Play Again</button>
+</section>
+</div>
+<script>
+"use strict";
+const STEPS=["Capture","Score","Route","Build","Deploy","Measure","Feedback","Improve"];
+const RIGS={Sales:"Generate Estimate",Service:"Dispatch Technician",Marketing:"Create Promotion",Review:"Request Review",Automation:"Run Automated Workflow"};
+const DEPLOY={Sales:"Send estimate & invoice",Service:"Send technician",Marketing:"Launch ad",Review:"Send review link",Automation:"Publish funnel / auto-reply"};
+const TYPES=[
+{k:"ac",n:"AC Down",i:"📞",em:1,rig:"Service",u:9,v:6,r:7,pay:1800,rep:4,cap:1,dur:40,w:3},
+{k:"fur",n:"Furnace Down",i:"🔥",em:1,rig:"Service",u:10,v:7,r:9,pay:2200,rep:5,cap:1,dur:45,w:2},
+{k:"lead",n:"New Lead",i:"📲",rig:"Sales",u:5,v:5,r:3,pay:900,rep:1,cap:0,w:3},
+{k:"com",n:"Commercial Lead",i:"💰",rig:"Sales",u:6,v:10,r:5,pay:4500,rep:2,cap:0,w:1},
+{k:"rev",n:"5-Star Review Opportunity",i:"⭐",rig:"Review",u:3,v:4,r:2,pay:0,rep:6,cap:0,w:2},
+{k:"ang",n:"Angry Customer",i:"😡",rig:"Service",u:8,v:4,r:8,pay:300,rep:6,cap:1,dur:25,w:2},
+{k:"sick",n:"Technician Sick",i:"🤒",rig:"Automation",u:7,v:3,r:6,pay:0,rep:2,cap:0,w:1},
+{k:"fac",n:"Broken Factory Unit",i:"⚙️",em:1,rig:"Service",u:10,v:8,r:9,pay:5200,rep:4,cap:2,dur:60,w:1},
+{k:"slow",n:"Slow Week Ahead",i:"📉",rig:"Marketing",u:4,v:6,r:4,pay:1400,rep:1,cap:0,w:1}
+];
+const UPG=[
+{k:"dispatch",n:"Faster Dispatch",d:"Service jobs finish 30% faster, less decay on emergencies",c:2500},
+{k:"auto",n:"Better Automation",d:"Signals decay 35% slower in the inbox",c:3000},
+{k:"qual",n:"Better Lead Qualification",d:"+30% on Sales revenue",c:2500},
+{k:"follow",n:"Better Follow-up",d:"+2 reputation on every good outcome",c:2000},
+{k:"cap",n:"+1 Capacity (hire tech)",d:"Handle one more job at a time",c:3500,multi:1}
+];
+let S,tick;
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll(".screen").forEach(e=>e.classList.toggle("on",e.id===id));window.scrollTo(0,0)};
+const money=n=>(n<0?"-$":"$")+Math.abs(Math.round(n)).toLocaleString();
+function pick(){let t=TYPES.reduce((a,b)=>a+b.w,0),x=Math.random()*t;for(const y of TYPES){x-=y.w;if(x<0)return y}return TYPES[0]}
+function start(sec){
+ S={rev:10000,rep:50,capMax:5,jobs:[],t:sec,total:sec,inbox:[],sel:null,step:0,id:0,handled:0,correct:0,routed:0,lost:0,scoreErr:0,up:{},leaks:{Routing:0,Waiting:0,Scoring:0,Capacity:0},next:3,log:[],gap:sec>300?15:12};
+ show("sGame");spawn();render();clearInterval(tick);tick=setInterval(loop,1000);
+}
+function spawn(){const t=pick();S.inbox.push({id:++S.id,t,age:0,life:t.em?55:80});log(`${t.i} New signal: ${t.n}`)}
+function capUsed(){return S.jobs.reduce((a,j)=>a+j.cap,0)}
+function loop(){
+ S.t--;S.next--;
+ if(S.next<=0){spawn();S.next=S.gap+Math.floor(Math.random()*5)-2}
+ const decay=S.up.auto?0.65:1;
+ for(const c of S.inbox.slice()){
+  c.age+=decay*(c.t.em&&S.up.dispatch?0.8:1);
+  if(c.age>=c.life&&c!==S.sel){S.inbox.splice(S.inbox.indexOf(c),1);S.rep-=c.t.em?6:3;S.lost++;S.leaks.Waiting++;log(`<span class=bad>${c.t.i} ${c.t.n} — customer left (waited too long)</span>`)}
+  else if(c.age>c.life*0.6&&Math.floor(c.age)%10===0)S.rep-=0.5;
+ }
+ for(const j of S.jobs)j.left--;
+ const done=S.jobs.filter(j=>j.left<=0);if(done.length){S.jobs=S.jobs.filter(j=>j.left>0);done.forEach(j=>log(`<span class=good>✅ Crew back from ${j.n}</span>`))}
+ if(S.rep<=0||S.t<=0)return endGame();
+ renderTop();renderInbox();
+}
+function log(m){S.log.unshift(m);S.log=S.log.slice(0,30);const l=$("log");if(l)l.innerHTML=S.log.join("<br>")}
+function renderTop(){
+ $("mRev").textContent=money(S.rev);$("mRep").textContent=Math.max(0,Math.round(S.rep));
+ $("mRep").className=S.rep<25?"bad":"good";
+ $("mCap").textContent=(S.capMax-capUsed())+"/"+S.capMax;
+ $("mTime").textContent=Math.floor(S.t/60)+":"+String(S.t%60).padStart(2,"0");
+ $("mTime").style.color=S.t<30?"var(--red)":"";
+}
+function renderInbox(){
+ $("inbox").innerHTML=S.inbox.length?S.inbox.map(c=>`<button class="card ${c.t.em?"em":""} ${S.sel===c?"sel":""}" onclick="selectCard(${c.id})">${c.t.i} <b>${c.t.n}</b><div class="w"><i style="width:${Math.min(100,c.age/c.life*100)}%"></i></div></button>`).join(""):`<div class="dim" style="padding:20px">All clear… next signal incoming.</div>`;
+}
+function renderSteps(){$("steps").innerHTML=STEPS.map((s,i)=>`<span class="${i<S.step?"done":i===S.step?"now":""}">${i+1} ${s}</span>`).join("")}
+function render(){renderTop();renderInbox();renderSteps();renderWork();log("")}
+function selectCard(id){if(S.sel&&S.step>1&&S.step<5)return;S.sel=S.inbox.find(c=>c.id===id);S.step=1;S.sc={u:5,v:5,r:5};render()}
+function setSc(k,v){S.sc[k]=+v;$("o"+k).textContent=v}
+function renderWork(){
+ const w=$("work"),c=S.sel;w.className="panel";
+ if(!c){w.innerHTML=`<b>1 · Capture</b><p class="dim">Tap a signal in the inbox to work it. Emergencies (red) decay fastest.</p>`;return}
+ const h=`<h2>${c.t.i} ${c.t.n}</h2>`;
+ if(S.step===1){w.className="panel dz";w.innerHTML=h+`<b>2 · Score it</b>`+["u","v","r"].map(k=>`<div class="row"><label>${{u:"Urgency",v:"Value",r:"Risk"}[k]}</label><input type=range min=1 max=10 value=${S.sc[k]} oninput="setSc('${k}',this.value)"><output id=o${k}>${S.sc[k]}</output></div>`).join("")+`<button class="big purple" onclick="doScore()">Lock Score ▶</button>`}
+ else if(S.step===2){w.className="panel dz";w.innerHTML=h+`<b>3 · Route to a Rig</b><div class=grid2>`+Object.keys(RIGS).map(r=>`<button class=purple onclick="doRoute('${r}')">${r} Rig</button>`).join("")+`</div>`}
+ else if(S.step===3){w.innerHTML=h+`<b>4 · Build</b><p>${S.rig} Rig response: <b>${RIGS[S.rig]}</b></p><button class="big blue" onclick="S.step=4;render()">Build ▶</button>`}
+ else if(S.step===4){const need=S.rig==="Service"?c.t.cap:0,free=S.capMax-capUsed();w.innerHTML=h+`<b>5 · Deploy</b><p>${DEPLOY[S.rig]}${need?` — uses ${need} capacity (${free} free)`:""}</p><button class="big blue" onclick="doDeploy()">Deploy ▶</button>`}
+ else if(S.step>=5){w.innerHTML=h+`<b>6 · Measure</b><p style="font-size:20px">${S.res.m}</p><b>7 · Feedback</b><p>${S.res.f}</p><div class=grid2><button class=blue onclick="finish()">Next Signal ▶</button><button class=gold onclick="finish();openShop()">8 · Improve</button></div>`}
+}
+function doScore(){const t=S.sel.t,e=Math.abs(S.sc.u-t.u)+Math.abs(S.sc.v-t.v)+Math.abs(S.sc.r-t.r);S.err=e;S.scoreErr+=e;S.step=2;render()}
+function doRoute(r){S.rig=r;S.routed++;if(r===S.sel.t.rig)S.correct++;else S.leaks.Routing++;S.step=3;render()}
+function doDeploy(){
+ const c=S.sel,t=c.t,ok=S.rig===t.rig,late=c.age/c.life;let rev=0,rep=0,f="",m="";
+ const free=S.capMax-capUsed();
+ if(ok&&S.rig==="Service"&&t.cap>free){
+  rep=-4;S.leaks.Capacity++;m=`<span class=bad>❌ No crew available — customer left</span>`;f="Capacity maxed out. Add capacity in Improve or keep a crew free for emergencies.";
+ }else if(!ok){
+  rep=-(t.em?7:4);rev=S.rig==="Marketing"?-500:0;
+  m=`<span class=bad>❌ ${RIGS[S.rig]} didn't fix it${rev?` (${money(rev)} wasted)`:""}</span>`;
+  f=`Wrong Rig. A ${t.n} belongs with the <b>${t.rig} Rig</b>. Routing error leaked this signal.`;
+ }else{
+  let mult=1;
+  if(late>0.6){mult=0.6;S.leaks.Waiting++;f="Customer waited too long — routing delay cut the payout. "}
+  const bonus=S.err<=3?1.25:S.err<=7?1:0.85;if(S.err>7)S.leaks.Scoring++;
+  if(t.rig==="Sales"&&S.up.qual)mult*=1.3;
+  rev=t.pay*mult*bonus;rep=t.rep*(late>0.6?0.5:1)+(S.up.follow?2:0)+(S.err<=3?1:0);
+  if(t.k==="sick"){f+="Automation reshuffled the schedule — no jobs dropped.";}
+  else if(t.k==="rev"){f+="Excellent response — review collected. ";}
+  else f+=late>0.6?"":"Excellent response — fast and on target. ";
+  f+=S.err<=3?" 🎯 Sharp scoring bonus (+25%).":S.err>7?" Your score was off — you misjudged it (-15%).":"";
+  if(S.rig==="Service"&&t.cap){const dur=Math.round((t.dur||30)*(S.up.dispatch?0.7:1));S.jobs.push({n:t.n,cap:t.cap,left:dur});}
+  m=`<span class=money>${rev?"+"+money(rev):"$0"}</span> · <span class=good>+${Math.round(rep)} rep</span>${S.rig==="Service"&&t.cap?` · ${t.cap} crew busy`:""}`;
+ }
+ S.rev+=rev;S.rep=Math.min(100,S.rep+rep);S.handled++;
+ S.inbox=S.inbox.filter(x=>x!==c);S.res={m,f};S.step=5;log(`${t.i} ${t.n} → ${S.rig}: ${m}`);render();
+}
+function finish(){S.sel=null;S.step=0;render()}
+function openShop(){
+ $("shopCash").textContent=money(S.rev);
+ $("shopList").innerHTML=UPG.map(u=>{const own=S.up[u.k]&&!u.multi;return `<div class="panel up"><div><b>${u.n}</b><div class=dim>${u.d}</div></div><button class=gold ${own||S.rev<u.c?"disabled":""} onclick="buy('${u.k}')">${own?"Owned":money(u.c)}</button></div>`}).join("");
+ show("sShop");
+}
+function buy(k){const u=UPG.find(x=>x.k===k);if(S.rev<u.c)return;S.rev-=u.c;S.up[k]=(S.up[k]||0)+1;if(k==="cap")S.capMax++;log(`<span class=money>🛠 Bought ${u.n}</span>`);openShop();renderTop()}
+function endGame(){
+ clearInterval(tick);if(!S)return;
+ const pct=S.routed?Math.round(S.correct/S.routed*100):0,rep=Math.max(0,Math.round(S.rep));
+ const score=(S.rev-10000)/1000*(600/S.total)+rep*0.5+pct*0.3-S.lost*2;
+ const g=rep<=0?"F":score>=60?"A":score>=40?"B":score>=22?"C":score>=8?"D":"F";
+ const worst=Object.entries(S.leaks).sort((a,b)=>b[1]-a[1])[0];
+ const L={Routing:"Your leads leaked at Routing — send each signal to the right Rig.",Waiting:"Your leads leaked while Waiting — capture faster or buy Better Automation.",Scoring:"Your leads leaked at Scoring — read urgency, value and risk more carefully.",Capacity:"Your leads leaked at Capacity — hire crew before the emergencies pile up."};
+ const lesson=S.handled===0?"No signals handled — a business that doesn't capture, doesn't grow.":worst[1]===0?"Clean loop. Every signal captured, scored, routed and turned into revenue.":L[worst[0]];
+ $("eGrade").textContent=g;
+ $("eStats").innerHTML=`Final Revenue: <b class=money>${money(S.rev)}</b><br>Final Reputation: <b>${rep}</b><br>Final Capacity: <b>${S.capMax} jobs</b><br>Signals handled: <b>${S.handled}</b> · lost: <b class=bad>${S.lost}</b><br>Correct-route: <b>${pct}%</b><br>Upgrades: ${Object.keys(S.up).length||"none"}`;
+ $("eLesson").textContent=lesson;show("sEnd");
+}
+</script></body></html>
